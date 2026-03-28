@@ -23,12 +23,19 @@ pub fn run_plugin(
         .spawn()
         .with_context(|| format!("failed to spawn plugin '{}'", plugin.name))?;
 
-    child
+    let write_result = child
         .stdin
         .take()
         .expect("stdin is piped")
-        .write_all(stdin_payload.to_string().as_bytes())
-        .context(format!("failed to write stdin to plugin '{}'", plugin.name))?;
+        .write_all(stdin_payload.to_string().as_bytes());
+
+    // A broken pipe means the plugin exited before reading stdin — that is valid
+    // behaviour for plugins that do not need the config blob.
+    if let Err(e) = write_result {
+        if e.kind() != std::io::ErrorKind::BrokenPipe {
+            return Err(e).context(format!("failed to write stdin to plugin '{}'", plugin.name));
+        }
+    }
 
     let output = child
         .wait_with_output()

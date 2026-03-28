@@ -225,6 +225,20 @@ Or pin the version for reproducible CI:
 
 ## Contributing
 
+### Proposing a new built-in rule
+
+ruffian only ships rules that ruff has explicitly declined to implement. Before opening a PR here, please follow this process:
+
+1. **Propose the rule to ruff first.** Open a feature request in the [ruff issue tracker](https://github.com/astral-sh/ruff/issues). Many rules belong there, not here — ruff has a much larger audience and faster release cadence.
+
+2. **Use the plugin system in the meantime.** While ruff considers your proposal, implement the rule as a [ruffian plugin](#plugin-system). This lets you and your team use it immediately with zero Rust code and no waiting on anyone.
+
+3. **If ruff declines, open an issue here first.** If ruff closes or explicitly refuses your issue, open a ruffian issue with a link to that discussion. This lets us align on the rule design before any code is written.
+
+4. **Then submit a PR.** Built-in ruffian rules are written in Rust — see [Adding a built-in rule](#adding-a-built-in-rule) below. Your PR must reference the ruffian issue and the upstream ruff discussion that refused the rule.
+
+This keeps ruffian's built-in rule set small and intentional: every rule here has a paper trail explaining why ruff said no.
+
 ### Prerequisites
 
 ```bash
@@ -256,7 +270,7 @@ pub trait Rule: Send + Sync {
 
 | Field | Type | Notes |
 |-------|------|-------|
-| `path` | `String` | Absolute path to the file |
+| `path` | `String` | Path to the file as provided to ruffian on the CLI |
 | `source` | `String` | Raw source text |
 | `ast` | `Option<Parsed<ModModule>>` | Parsed AST from `ruff_python_parser`; `None` if the file has syntax errors |
 
@@ -269,10 +283,13 @@ See [PLC0302](src/rules/too_many_module_lines.rs) for a complete example.
 ### Development commands
 
 ```bash
-task build        # debug build
-task test         # run all tests
-task lint         # cargo clippy -D warnings
-task lint:fix     # clippy --fix + cargo fmt
+task build              # debug build
+task test               # run all tests
+task test:coverage      # run tests with coverage report, fail below 85%
+task lint               # cargo clippy -D warnings
+task lint:fix           # clippy --fix (--allow-dirty) + cargo fmt
+task fmt:check          # check formatting without writing changes (what CI runs)
+task install:local      # build and install into the active Python env for manual testing
 ```
 
 ### Coding style
