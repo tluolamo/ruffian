@@ -345,6 +345,71 @@ fn json_output_is_empty_array_for_clean_file() {
 }
 
 #[test]
+fn noqa_bare_suppresses_ruffian_violation() {
+    let dir = TempDir::new().unwrap();
+    let file = dir.path().join("long.py");
+    // First line carries `# ruffian: noqa` — PLC0302 should be suppressed.
+    let mut content = "x = 1  # ruffian: noqa\n".to_owned();
+    content.push_str(&(2..=1002).map(|i| format!("x{i} = {i}\n")).collect::<String>());
+    fs::write(&file, content).unwrap();
+
+    fs::write(
+        dir.path().join("pyproject.toml"),
+        "[tool.ruffian]\nselect = [\"PLC0302\"]\n",
+    )
+    .unwrap();
+
+    cmd()
+        .current_dir(&dir)
+        .args(["check", file.to_str().unwrap()])
+        .assert()
+        .success();
+}
+
+#[test]
+fn noqa_specific_code_suppresses_matching_violation() {
+    let dir = TempDir::new().unwrap();
+    let file = dir.path().join("long.py");
+    let mut content = "x = 1  # ruffian: noqa PLC0302\n".to_owned();
+    content.push_str(&(2..=1002).map(|i| format!("x{i} = {i}\n")).collect::<String>());
+    fs::write(&file, content).unwrap();
+
+    fs::write(
+        dir.path().join("pyproject.toml"),
+        "[tool.ruffian]\nselect = [\"PLC0302\"]\n",
+    )
+    .unwrap();
+
+    cmd()
+        .current_dir(&dir)
+        .args(["check", file.to_str().unwrap()])
+        .assert()
+        .success();
+}
+
+#[test]
+fn noqa_specific_code_does_not_suppress_other_violation() {
+    let dir = TempDir::new().unwrap();
+    let file = dir.path().join("long.py");
+    // noqa for a different code — PLC0302 should still fire.
+    let mut content = "x = 1  # ruffian: noqa RFN001\n".to_owned();
+    content.push_str(&(2..=1002).map(|i| format!("x{i} = {i}\n")).collect::<String>());
+    fs::write(&file, content).unwrap();
+
+    fs::write(
+        dir.path().join("pyproject.toml"),
+        "[tool.ruffian]\nselect = [\"PLC0302\"]\n",
+    )
+    .unwrap();
+
+    cmd()
+        .current_dir(&dir)
+        .args(["check", file.to_str().unwrap()])
+        .assert()
+        .failure();
+}
+
+#[test]
 fn fix_flag_applies_ruff_fixes_and_exits_zero() {
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("fixable.py");

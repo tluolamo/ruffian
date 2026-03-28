@@ -282,9 +282,9 @@ Milestone: A user can drop a Python script into their repo and register it as a 
 
 - [x] `ruffian rule PLC0302` — print rule docs (mirrors `ruff rule E501`)
 - [x] `ruffian check --select PLC0302` / `--ignore PLC0302`
-- [ ] `# ruffian: noqa PLC0302` inline suppression
+- [x] `# ruffian: noqa PLC0302` inline suppression
 - [ ] VS Code problem matcher compatibility (output format already matches ruff's)
-- [ ] GitHub Actions example in README
+- [x] GitHub Actions example in README
 - [ ] Second and third built-in rules based on demand
 
 ---

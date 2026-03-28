@@ -42,6 +42,20 @@ ruffian accepts the same flags as `ruff check` for the options it passes through
 
 ---
 
+## Inline suppression
+
+Add a `# ruffian: noqa` comment to suppress ruffian violations on a specific line:
+
+```python
+some_huge_module_header = True  # ruffian: noqa           # suppress all ruffian rules on this line
+some_huge_module_header = True  # ruffian: noqa PLC0302   # suppress a specific rule
+some_huge_module_header = True  # ruffian: noqa PLC0302, RFN001  # suppress multiple rules
+```
+
+> **Note:** ruff's own `# noqa` suppression is handled by ruff before violations reach ruffian. Use `# noqa: CODE` to suppress ruff violations and `# ruffian: noqa CODE` to suppress ruffian violations.
+
+---
+
 ## Configuration
 
 All ruffian config lives in `pyproject.toml` under `[tool.ruffian]`. Ruff's own `[tool.ruff]` section is untouched and passed directly to ruff.
@@ -86,6 +100,20 @@ Reports Python modules that exceed a configurable line count. Encourages splitti
 ```toml
 [tool.ruffian.rules.PLC0302]
 max-lines = 800   # default: 1000
+```
+
+To raise the limit or disable the rule globally:
+
+```toml
+[tool.ruffian]
+ignore = ["PLC0302"]   # disable entirely
+```
+
+To suppress it for a single file, add `# ruffian: noqa PLC0302` to line 1 of that file (the rule always fires on line 1):
+
+```python
+# ruffian: noqa PLC0302 — this file is intentionally large (generated code)
+...
 ```
 
 ---
@@ -157,6 +185,26 @@ A working example is in [`python/example_plugins/example_plugin.py`](python/exam
 ### Security note
 
 Plugins run as arbitrary executables with the same permissions as your shell. Only register plugins you trust.
+
+---
+
+## GitHub Actions
+
+```yaml
+- name: Lint with ruffian
+  run: |
+    pip install ruffian
+    ruffian check src/
+```
+
+Or pin the version for reproducible CI:
+
+```yaml
+- name: Lint with ruffian
+  run: |
+    pip install ruffian==0.1.0
+    ruffian check src/
+```
 
 ---
 

@@ -9,6 +9,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- Inline suppression via `# ruffian: noqa` (suppress all ruffian rules on a line) and `# ruffian: noqa CODE1, CODE2` (suppress specific codes)
+
 ## [0.1.0] — 2026-03-28
 
 ### Added

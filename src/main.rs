@@ -3,6 +3,7 @@ use clap::Parser;
 
 mod cli;
 mod config;
+mod noqa;
 mod output;
 mod plugin;
 mod ruff;

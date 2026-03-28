@@ -1,7 +1,7 @@
 use anyhow::Result;
 use ignore::WalkBuilder;
 
-use crate::{config, output, plugin, ruff, rules};
+use crate::{config, noqa, output, plugin, ruff, rules};
 
 pub fn run_check(
     files: Vec<String>,
@@ -71,7 +71,7 @@ pub fn run_check(
     violations.append(&mut rules_handle.join().expect("rules thread panicked")?);
     violations.append(&mut plugins_handle.join().expect("plugins thread panicked")?);
 
-    let violations = output::merge_sorted(violations);
+    let violations = output::merge_sorted(noqa::filter_noqa(violations));
     let has_violations = !violations.is_empty();
 
     match output_format.as_str() {
