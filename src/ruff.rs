@@ -41,16 +41,30 @@ pub fn check(files: &[String], extra_args: &[&str]) -> Result<Vec<Violation>> {
     Ok(violations)
 }
 
-/// Pass `ruff format` through directly, replacing the current process.
+/// Pass `ruff format` through directly, propagating ruff's exit code.
 pub fn passthrough_format(files: Vec<String>, check: bool) -> Result<()> {
     let mut cmd = build_format_cmd(&files, check);
 
-    // Replace current process with ruff so exit code propagates correctly.
-    // Note: lines after exec() are unreachable on success and cannot be covered
-    // by integration tests — exec() replaces the process before coverage data is flushed.
-    use std::os::unix::process::CommandExt;
-    let err = cmd.exec();
-    Err(anyhow::anyhow!("failed to exec ruff: {err}"))
+    #[cfg(unix)]
+    {
+        // On Unix, replace the current process with ruff so the exit code propagates
+        // exactly. Lines after exec() are unreachable on success.
+        use std::os::unix::process::CommandExt;
+        let err = cmd.exec();
+        Err(anyhow::anyhow!("failed to exec ruff: {err}"))
+    }
+
+    #[cfg(not(unix))]
+    {
+        // On Windows, exec() is unavailable — spawn and wait, then mirror the exit code.
+        let status = cmd
+            .status()
+            .context("failed to spawn ruff — is it installed and on PATH?")?;
+        if !status.success() {
+            std::process::exit(status.code().unwrap_or(1));
+        }
+        Ok(())
+    }
 }
 
 fn build_format_cmd(files: &[String], check: bool) -> Command {
