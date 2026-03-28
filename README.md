@@ -188,6 +188,20 @@ Plugins run as arbitrary executables with the same permissions as your shell. On
 
 ---
 
+## Editor integration
+
+ruffian's output format is identical to ruff's, so any editor integration that already works with ruff will work with ruffian without changes. Replace `ruff` with `ruffian` in your editor's lint command setting.
+
+For VS Code with the [Ruff extension](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff), point it at the ruffian binary:
+
+```json
+{
+  "ruff.path": ["/path/to/ruffian"]
+}
+```
+
+---
+
 ## GitHub Actions
 
 ```yaml
