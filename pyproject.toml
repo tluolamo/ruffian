@@ -1,0 +1,40 @@
+[build-system]
+requires = ["maturin>=1.8,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "ruffian"
+version = "0.1.0"
+description = "A superset of ruff: runs ruff internally, adds built-in rules, and supports user-defined plugin executables"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+keywords = ["python", "linter", "ruff"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Rust",
+    "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = [
+    "ruff>=0.11.0",
+]
+
+[project.scripts]
+ruffian = "ruffian:main"
+
+[project.urls]
+Repository = "https://github.com/tuukkamustonen/ruffian"
+Issues = "https://github.com/tuukkamustonen/ruffian/issues"
+
+[tool.maturin]
+bindings = "bin"
+strip = true
+
+# ruffian's own config lives here; ruff reads its own [tool.ruff] section directly
+[tool.ruffian]
+select = []
+ignore = []

@@ -1,0 +1,19 @@
+# Rust / Cargo
+/target/
+Cargo.lock
+
+# Python / maturin
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+.venv/
+*.whl
+
+# macOS
+.DS_Store
+
+# Editor
+.idea/
+.vscode/
+*.swp

@@ -1,0 +1,42 @@
+version: "3"
+
+tasks:
+  build:
+    desc: Build the ruffian binary (debug)
+    cmd: cargo build
+
+  build:release:
+    desc: Build the ruffian binary (release)
+    cmd: cargo build --release
+
+  test:
+    desc: Run all tests
+    cmd: cargo test
+
+  lint:
+    desc: Run clippy
+    cmd: cargo clippy -- -D warnings
+
+  lint:fix:
+    desc: Run clippy with auto-fix and format
+    cmds:
+      - cargo clippy --fix --allow-dirty -- -D warnings
+      - cargo fmt
+
+  fmt:
+    desc: Format source code
+    cmd: cargo fmt
+
+  fmt:check:
+    desc: Check formatting without writing changes
+    cmd: cargo fmt -- --check
+
+  clean:
+    desc: Remove build artifacts
+    cmd: cargo clean
+
+  publish:
+    desc: Build and publish Python wheel to PyPI via maturin
+    cmds:
+      - maturin build --release
+      - maturin publish
