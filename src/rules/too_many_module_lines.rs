@@ -14,7 +14,20 @@ pub struct TooManyModuleLines {
 
 impl Default for TooManyModuleLines {
     fn default() -> Self {
-        Self { max_lines: DEFAULT_MAX_LINES }
+        Self {
+            max_lines: DEFAULT_MAX_LINES,
+        }
+    }
+}
+
+impl TooManyModuleLines {
+    pub fn from_config(val: Option<&toml::Value>) -> Self {
+        let max_lines = val
+            .and_then(|v| v.get("max-lines"))
+            .and_then(|v| v.as_integer())
+            .map(|n| n as usize)
+            .unwrap_or(DEFAULT_MAX_LINES);
+        Self { max_lines }
     }
 }
 

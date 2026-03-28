@@ -1,42 +1,77 @@
 version: "3"
 
+vars:
+  CARGO:
+    sh: echo "$HOME/.cargo/bin/cargo"
+  RUSTUP:
+    sh: echo "$HOME/.cargo/bin/rustup"
+  COVERAGE_THRESHOLD: "85"
+
 tasks:
+  setup:
+    desc: Install all prerequisites for development
+    cmds:
+      - brew install rustup
+      - rustup-init -y
+      - task: toolchain
+      - pip install maturin
+
+  toolchain:
+    desc: Install all required dev tools and rustup components
+    internal: true
+    cmds:
+      - "{{.RUSTUP}} component add llvm-tools-preview"
+      - "{{.CARGO}} install cargo-llvm-cov --quiet"
+
   build:
     desc: Build the ruffian binary (debug)
-    cmd: cargo build
+    cmd: "{{.CARGO}} build"
 
   build:release:
     desc: Build the ruffian binary (release)
-    cmd: cargo build --release
+    cmd: "{{.CARGO}} build --release"
 
   test:
     desc: Run all tests
-    cmd: cargo test
+    cmd: "{{.CARGO}} test"
+
+  test:coverage:
+    desc: Run tests with coverage report, fail below 85%
+    cmds:
+      - task: toolchain
+      - "{{.CARGO}} llvm-cov --fail-under-lines {{.COVERAGE_THRESHOLD}} --fail-under-functions {{.COVERAGE_THRESHOLD}}"
+
+  test:coverage:report:
+    desc: Open an HTML coverage report showing missed lines
+    cmds:
+      - task: toolchain
+      - "{{.CARGO}} llvm-cov --open --fail-under-lines {{.COVERAGE_THRESHOLD}} --fail-under-functions {{.COVERAGE_THRESHOLD}}"
 
   lint:
     desc: Run clippy
-    cmd: cargo clippy -- -D warnings
+    cmd: "{{.CARGO}} clippy -- -D warnings"
 
   lint:fix:
     desc: Run clippy with auto-fix and format
     cmds:
-      - cargo clippy --fix --allow-dirty -- -D warnings
-      - cargo fmt
+      - "{{.CARGO}} clippy --fix --allow-dirty -- -D warnings"
+      - "{{.CARGO}} fmt"
 
   fmt:
     desc: Format source code
-    cmd: cargo fmt
+    cmd: "{{.CARGO}} fmt"
 
   fmt:check:
     desc: Check formatting without writing changes
-    cmd: cargo fmt -- --check
+    cmd: "{{.CARGO}} fmt -- --check"
 
   clean:
     desc: Remove build artifacts
-    cmd: cargo clean
+    cmd: "{{.CARGO}} clean"
 
   publish:
     desc: Build and publish Python wheel to PyPI via maturin
     cmds:
+      - task: toolchain
       - maturin build --release
       - maturin publish

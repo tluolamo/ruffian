@@ -36,22 +36,56 @@ pub fn check(files: &[String], extra_args: &[&str]) -> Result<Vec<Violation>> {
     if output.stdout.is_empty() {
         return Ok(vec![]);
     }
-    let violations: Vec<Violation> = serde_json::from_slice(&output.stdout)
-        .context("failed to parse ruff JSON output")?;
+    let violations: Vec<Violation> =
+        serde_json::from_slice(&output.stdout).context("failed to parse ruff JSON output")?;
     Ok(violations)
 }
 
 /// Pass `ruff format` through directly, replacing the current process.
 pub fn passthrough_format(files: Vec<String>, check: bool) -> Result<()> {
+    let mut cmd = build_format_cmd(&files, check);
+
+    // Replace current process with ruff so exit code propagates correctly.
+    // Note: lines after exec() are unreachable on success and cannot be covered
+    // by integration tests — exec() replaces the process before coverage data is flushed.
+    use std::os::unix::process::CommandExt;
+    let err = cmd.exec();
+    Err(anyhow::anyhow!("failed to exec ruff: {err}"))
+}
+
+fn build_format_cmd(files: &[String], check: bool) -> Command {
     let mut cmd = Command::new("ruff");
     cmd.arg("format");
     if check {
         cmd.arg("--check");
     }
-    cmd.args(&files);
+    cmd.args(files);
+    cmd
+}
 
-    // Replace current process with ruff so exit code propagates correctly.
-    use std::os::unix::process::CommandExt;
-    let err = cmd.exec();
-    Err(anyhow::anyhow!("failed to exec ruff: {err}"))
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn build_format_cmd_includes_check_flag() {
+        let cmd = build_format_cmd(&["a.py".to_owned()], true);
+        let args: Vec<_> = cmd.get_args().collect();
+        assert!(args.contains(&"--check".as_ref()));
+    }
+
+    #[test]
+    fn build_format_cmd_omits_check_flag_when_false() {
+        let cmd = build_format_cmd(&["a.py".to_owned()], false);
+        let args: Vec<_> = cmd.get_args().collect();
+        assert!(!args.contains(&"--check".as_ref()));
+    }
+
+    #[test]
+    fn build_format_cmd_includes_files() {
+        let cmd = build_format_cmd(&["src/foo.py".to_owned(), "src/bar.py".to_owned()], false);
+        let args: Vec<_> = cmd.get_args().collect();
+        assert!(args.contains(&"src/foo.py".as_ref()));
+        assert!(args.contains(&"src/bar.py".as_ref()));
+    }
 }

@@ -2,7 +2,10 @@ use anyhow::Result;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
-#[command(name = "ruffian", about = "A superset of ruff with additional built-in rules and plugin support")]
+#[command(
+    name = "ruffian",
+    about = "A superset of ruff with additional built-in rules and plugin support"
+)]
 #[command(version)]
 pub struct Cli {
     #[command(subcommand)]
@@ -47,21 +50,21 @@ pub enum Command {
 
     /// Show documentation for a rule
     Rule {
-        /// Rule code (e.g. RFN001)
+        /// Rule code (e.g. PLC0302)
         code: String,
     },
 }
 
 pub fn run(cli: Cli) -> Result<()> {
     match cli.command {
-        Command::Check { files, output_format, fix, select, ignore } => {
-            crate::runner::run_check(files, output_format, fix, select, ignore)
-        }
-        Command::Format { files, check } => {
-            crate::ruff::passthrough_format(files, check)
-        }
-        Command::Rule { code } => {
-            crate::rules::print_rule_docs(&code)
-        }
+        Command::Check {
+            files,
+            output_format,
+            fix,
+            select,
+            ignore,
+        } => crate::runner::run_check(files, output_format, fix, select, ignore),
+        Command::Format { files, check } => crate::ruff::passthrough_format(files, check),
+        Command::Rule { code } => crate::rules::print_rule_docs(&code),
     }
 }

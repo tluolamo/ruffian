@@ -6,20 +6,25 @@ pub use rule::{ParsedFile, Rule};
 use crate::ruff::Violation;
 use anyhow::Result;
 use rayon::prelude::*;
-use std::path::Path;
+use std::collections::HashMap;
 
 // ── Rule registry ────────────────────────────────────────────────────────────
 // Add one line here for each new rule. No other changes required.
-fn all_rules() -> Vec<Box<dyn Rule>> {
-    vec![
-        Box::new(too_many_module_lines::TooManyModuleLines::default()),
-    ]
+fn all_rules(rules_config: &HashMap<String, toml::Value>) -> Vec<Box<dyn Rule>> {
+    vec![Box::new(
+        too_many_module_lines::TooManyModuleLines::from_config(rules_config.get("PLC0302")),
+    )]
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Run all enabled rules against the given files and return violations.
-pub fn run_all(files: &[String], select: &[String], ignore: &[String]) -> Result<Vec<Violation>> {
-    let rules = all_rules();
+pub fn run_all(
+    files: &[String],
+    select: &[String],
+    ignore: &[String],
+    rules_config: &HashMap<String, toml::Value>,
+) -> Result<Vec<Violation>> {
+    let rules = all_rules(rules_config);
     let active_rules: Vec<&Box<dyn Rule>> = rules
         .iter()
         .filter(|r| is_active(r.code(), select, ignore))
@@ -35,7 +40,10 @@ pub fn run_all(files: &[String], select: &[String], ignore: &[String]) -> Result
                     return vec![];
                 }
             };
-            let parsed = ParsedFile { path: path.clone(), source };
+            let parsed = ParsedFile {
+                path: path.clone(),
+                source,
+            };
             active_rules
                 .iter()
                 .flat_map(|rule| rule.check(&parsed))
@@ -48,7 +56,7 @@ pub fn run_all(files: &[String], select: &[String], ignore: &[String]) -> Result
 
 /// Print documentation for a single rule code to stdout.
 pub fn print_rule_docs(code: &str) -> Result<()> {
-    let rules = all_rules();
+    let rules = all_rules(&HashMap::new());
     match rules.iter().find(|r| r.code().eq_ignore_ascii_case(code)) {
         Some(rule) => {
             println!("{} — {}", rule.code(), rule.name());

@@ -36,5 +36,5 @@ strip = true
 
 # ruffian's own config lives here; ruff reads its own [tool.ruff] section directly
 [tool.ruffian]
-select = []   # empty = all built-in rules enabled (e.g. ["C0302", "RFN001"])
+select = []   # empty = all built-in rules enabled (e.g. ["PLC0302", "RFN001"])
 ignore = []

@@ -39,6 +39,8 @@
 - Start with happy path, then edge cases
 - Each test should assert one outcome; avoid multiple unrelated assertions per test
 - Do not test dead code — if code is unreachable from any test entry point, consider removing it
+- Require 85% line coverage across the project (`task test:coverage`); threshold is project-wide, not per file
+- Coverage tool: `cargo-llvm-cov` — install once with `cargo install cargo-llvm-cov`
 
 ## Taskfile
 

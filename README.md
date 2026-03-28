@@ -30,7 +30,7 @@ ruffian check src/
 ruffian format src/
 
 # Show documentation for a built-in rule
-ruffian rule RFN001
+ruffian rule PLC0302
 
 # JSON output (same format as ruff --output-format json)
 ruffian check src/ --output-format json
@@ -46,11 +46,11 @@ All ruffian config lives in `pyproject.toml` under `[tool.ruffian]`. Ruff's own 
 
 ```toml
 [tool.ruffian]
-select = ["RFN001"]   # built-in rules to enable (empty = all enabled)
+select = ["PLC0302"]   # built-in rules to enable (empty = all enabled)
 ignore = []
 
-[tool.ruffian.rules.RFN001]
-max-lines = 800       # override the default (1000)
+[tool.ruffian.rules.PLC0302]
+max-lines = 800        # override the default (1000)
 
 # User plugins
 [[tool.ruffian.plugins]]
@@ -77,12 +77,12 @@ ruffian follows ruff's own prefix conventions. Since ruffian only implements rul
 | `RFN` | Novel rules with no equivalent in any existing linter |
 | `RFC` | Reserved for user plugin rules — plugin authors must use this prefix to avoid collisions with ruffian built-ins |
 
-### RFN001 — too-many-module-lines
+### PLC0302 — too-many-module-lines
 
 Reports Python modules that exceed a configurable line count. Encourages splitting large files before they become hard to navigate.
 
 ```toml
-[tool.ruffian.rules.RFN001]
+[tool.ruffian.rules.PLC0302]
 max-lines = 800   # default: 1000
 ```
 
@@ -175,9 +175,23 @@ Plugins run as arbitrary executables with the same permissions as your shell. On
 
 ## Contributing
 
+### Prerequisites
+
+```bash
+# 1. Install the task runner (provides the `task` command)
+brew install go-task
+
+# 2. Install everything else
+task setup
+```
+
+`task setup` installs the Rust toolchain via rustup, dev tools (cargo-llvm-cov, llvm-tools), and maturin for packaging. After it completes, restart your terminal or run `source ~/.cargo/env` to pick up the Rust toolchain.
+
+---
+
 ### Adding a built-in rule
 
-1. Create `src/rules/rfnXXX_<rule_name>.rs` and implement the `Rule` trait:
+1. Create `src/rules/<rule_name>.rs` and implement the `Rule` trait:
 
 ```rust
 pub trait Rule: Send + Sync {
@@ -190,7 +204,7 @@ pub trait Rule: Send + Sync {
 
 2. Register it in `src/rules/mod.rs` — one line in `all_rules()`. No other changes required.
 
-See [RFN001](src/rules/rfn001_too_many_module_lines.rs) for a complete example.
+See [PLC0302](src/rules/too_many_module_lines.rs) for a complete example.
 
 ### Development commands
 

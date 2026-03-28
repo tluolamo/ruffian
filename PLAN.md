@@ -71,10 +71,10 @@ All ruffian config lives in `pyproject.toml` under `[tool.ruffian]`. Ruff's own 
 ```toml
 [tool.ruffian]
 # built-in rules
-select = ["RFN001"]          # too-many-module-lines
+select = ["PLC0302"]          # too-many-module-lines
 ignore = []
 
-[tool.ruffian.rules.RFN001]
+[tool.ruffian.rules.PLC0302]
 max-lines = 800
 
 # user plugins
@@ -92,7 +92,7 @@ Built-in ruffian rules use the prefix `RFN` (Ruffian):
 
 | Code    | Description               |
 |---------|---------------------------|
-| RFN001  | too-many-module-lines     |
+| PLC0302  | too-many-module-lines     |
 | RFN002  | (next built-in rule)      |
 | RFN9xx  | reserved for plugins      |
 
@@ -247,9 +247,9 @@ Users replace `ruff` with `ruffian` everywhere:
 
 ### Phase 1 — Scaffold & passthrough (v0.1)
 
-- [ ] Cargo project with clap CLI matching ruff's `check` / `format` / `--help` surface
-- [ ] `ruff format` passthrough (exec ruff directly)
-- [ ] `ruff check` passthrough via subprocess, parse JSON, re-emit text output
+- [x] Cargo project with clap CLI matching ruff's `check` / `format` / `--help` surface
+- [x] `ruff format` passthrough (exec ruff directly)
+- [x] `ruff check` passthrough via subprocess, parse JSON, re-emit text output
 - [ ] Output format matches ruff exactly (verified by diff tests)
 - [ ] maturin packaging, basic PyPI publish
 
@@ -257,32 +257,32 @@ Milestone: `ruffian check .` and `ruff check .` produce identical output on a pr
 
 ### Phase 2 — First built-in rule (v0.2)
 
-- [ ] `ParsedFile` struct wrapping `ruff_python_parser` output
-- [ ] `Rule` trait + rule registry
-- [ ] `RFN001` too-many-module-lines (configurable, default 1000)
-- [ ] Config parsing from `pyproject.toml` `[tool.ruffian]`
-- [ ] Concurrent execution: ruff subprocess + built-in rules run in parallel
-- [ ] Merged, sorted output
-- [ ] JSON output mode (`--output-format json`) includes ruffian violations
+- [ ] `ParsedFile` struct wrapping `ruff_python_parser` output (struct exists but currently holds raw source — AST integration pending)
+- [x] `Rule` trait + rule registry
+- [x] `PLC0302` too-many-module-lines (configurable, default 1000)
+- [x] Config parsing from `pyproject.toml` `[tool.ruffian]`
+- [x] Concurrent execution: ruff subprocess + built-in rules run in parallel
+- [x] Merged, sorted output
+- [x] JSON output mode (`--output-format json`) includes ruffian violations
 
-Milestone: `ruffian check .` runs ruff + RFN001 and reports both.
+Milestone: `ruffian check .` runs ruff + PLC0302 and reports both.
 
 ### Phase 3 — Plugin system (v0.3)
 
-- [ ] Plugin discovery from `[[tool.ruffian.plugins]]`
-- [ ] Plugin invocation with file args + stdin config JSON
-- [ ] Plugin stdout parsing, stderr forwarding
-- [ ] Plugin failure handling (non-zero exit → error, not lint failure)
-- [ ] Example Python plugin shipped in repo
-- [ ] Plugin documentation
+- [x] Plugin discovery from `[[tool.ruffian.plugins]]`
+- [x] Plugin invocation with file args + stdin config JSON
+- [x] Plugin stdout parsing, stderr forwarding
+- [x] Plugin failure handling (non-zero exit → error, not lint failure)
+- [x] Example Python plugin shipped in repo
+- [x] Plugin documentation
 
 Milestone: A user can drop a Python script into their repo and register it as a ruffian plugin with zero Rust code.
 
 ### Phase 4 — Polish (v0.4+)
 
-- [ ] `ruffian rule RFN001` — print rule docs (mirrors `ruff rule E501`)
-- [ ] `ruffian check --select RFN001` / `--ignore RFN001`
-- [ ] `# ruffian: noqa RFN001` inline suppression
+- [x] `ruffian rule PLC0302` — print rule docs (mirrors `ruff rule E501`)
+- [x] `ruffian check --select PLC0302` / `--ignore PLC0302`
+- [ ] `# ruffian: noqa PLC0302` inline suppression
 - [ ] VS Code problem matcher compatibility (output format already matches ruff's)
 - [ ] GitHub Actions example in README
 - [ ] Second and third built-in rules based on demand

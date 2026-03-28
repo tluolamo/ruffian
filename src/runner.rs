@@ -1,5 +1,4 @@
 use anyhow::Result;
-use std::path::Path;
 
 use crate::{config, output, plugin, ruff, rules};
 
@@ -14,23 +13,34 @@ pub fn run_check(
     let cfg = config::load(&cwd)?;
 
     // Merge CLI selects/ignores with config file values.
-    let effective_select: Vec<String> = if select.is_empty() { cfg.select.clone() } else { select };
-    let effective_ignore: Vec<String> = if ignore.is_empty() { cfg.ignore.clone() } else { ignore };
+    let effective_select: Vec<String> = if select.is_empty() {
+        cfg.select.clone()
+    } else {
+        select
+    };
+    let effective_ignore: Vec<String> = if ignore.is_empty() {
+        cfg.ignore.clone()
+    } else {
+        ignore
+    };
 
     // Run ruff, built-in rules, and plugins concurrently.
     // TODO(Phase 2): replace std::thread with tokio tasks once async is wired up.
     let files_clone = files.clone();
     let ruff_handle = std::thread::spawn(move || {
         let mut extra: Vec<&str> = vec![];
-        if fix { extra.push("--fix"); }
+        if fix {
+            extra.push("--fix");
+        }
         ruff::check(&files_clone, &extra)
     });
 
     let files_clone2 = files.clone();
     let select_clone = effective_select.clone();
     let ignore_clone = effective_ignore.clone();
+    let rules_config = cfg.rules.clone();
     let rules_handle = std::thread::spawn(move || {
-        rules::run_all(&files_clone2, &select_clone, &ignore_clone)
+        rules::run_all(&files_clone2, &select_clone, &ignore_clone, &rules_config)
     });
 
     let plugins = cfg.plugins.clone();

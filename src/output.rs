@@ -1,5 +1,4 @@
 use crate::ruff::Violation;
-use serde_json;
 
 pub fn emit_text(violations: &[Violation]) {
     for v in violations {
@@ -15,7 +14,10 @@ pub fn emit_text(violations: &[Violation]) {
 }
 
 pub fn emit_json(violations: &[Violation]) {
-    println!("{}", serde_json::to_string_pretty(violations).expect("serialization is infallible"));
+    println!(
+        "{}",
+        serde_json::to_string_pretty(violations).expect("serialization is infallible")
+    );
 }
 
 /// Merge and sort violations from multiple sources by filename, then row, then column.

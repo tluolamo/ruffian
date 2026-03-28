@@ -6,7 +6,10 @@ use thiserror::Error;
 #[derive(Debug, Error)]
 pub enum ConfigError {
     #[error("failed to read {path}: {source}")]
-    Io { path: String, source: std::io::Error },
+    Io {
+        path: String,
+        source: std::io::Error,
+    },
     #[error("failed to parse pyproject.toml: {0}")]
     Parse(#[from] toml::de::Error),
 }
@@ -27,8 +30,12 @@ pub struct Config {
 pub struct PluginConfig {
     pub name: String,
     pub executable: String,
-    #[serde(default)]
+    #[serde(default = "empty_table")]
     pub config: toml::Value,
+}
+
+fn empty_table() -> toml::Value {
+    toml::Value::Table(toml::map::Map::new())
 }
 
 #[derive(Debug, Deserialize)]
