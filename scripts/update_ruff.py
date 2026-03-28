@@ -37,11 +37,21 @@ def main() -> None:
 
     print(f"Updating ruff: {current} → {latest}")
 
+    version = latest.lstrip("v")
+    current_version = current.lstrip("v")
+
     cargo_path.write_text(cargo.replace(f'tag = "{current}"', f'tag = "{latest}"'))
 
     pyproject = pyproject_path.read_text()
-    version = latest.lstrip("v")
     pyproject_path.write_text(re.sub(r"ruff>=[\d.]+", f"ruff>={version}", pyproject))
+
+    readme_path = ROOT / "README.md"
+    readme = readme_path.read_text()
+    readme_path.write_text(re.sub(
+        r"!\[ruff [\d.]+\]\(https://img\.shields\.io/badge/ruff-[\d.]+-30173D\)",
+        f"![ruff {version}](https://img.shields.io/badge/ruff-{version}-30173D)",
+        readme,
+    ))
 
     print("Done. Run `cargo build` to verify the new version compiles.")
 

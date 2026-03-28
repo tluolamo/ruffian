@@ -1,5 +1,7 @@
 # ruffian
 
+![ruff 0.15.8](https://img.shields.io/badge/ruff-0.15.8-30173D)
+
 > *A ruffian breaks rules. This tool adds the ones ruff refused.*
 
 **ruffian** is a drop-in superset of [ruff](https://github.com/astral-sh/ruff). It runs ruff internally, adds its own built-in lint rules, and supports user-defined plugin executables — all producing output that is indistinguishable from ruff's own.
