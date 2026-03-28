@@ -69,6 +69,21 @@ tasks:
     desc: Check formatting without writing changes
     cmd: "{{.CARGO}} fmt -- --check"
 
+  version:bump:
+    desc: "Bump version in Cargo.toml and push. Auto-increments minor if no version given. Usage: task version:bump [-- X.Y.Z]"
+    vars:
+      NEW_VERSION:
+        sh: python3 scripts/bump_version.py {{.CLI_ARGS}}
+    cmds:
+      - "{{.CARGO}} generate-lockfile"
+      - git add Cargo.toml Cargo.lock
+      - git commit -m "chore: bump version to {{.NEW_VERSION}}"
+      - git push
+
+  release:
+    desc: "Create a GitHub release: checks version, waits for CI, generates notes, opens editor, publishes. Usage: task release"
+    cmd: python3 scripts/create_release.py
+
   ruff:update:
     desc: Update ruff git dependency pins to the latest release
     cmds:

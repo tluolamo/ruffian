@@ -304,6 +304,9 @@ task lint               # cargo clippy -D warnings
 task lint:fix           # clippy --fix (--allow-dirty) + cargo fmt
 task fmt:check          # check formatting without writing changes (what CI runs)
 task install:local      # build and install into the active Python env for manual testing
+task version:bump       # bump minor version and push (optionally: task version:bump -- 1.0.0)
+task release            # interactive release: checks CI, generates notes, creates GitHub release
+task ruff:update        # update ruff dependency pins to latest release
 ```
 
 ### Coding style
