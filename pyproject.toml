@@ -4,7 +4,8 @@ build-backend = "maturin"
 
 [project]
 name = "ruffian"
-version = "0.1.0"
+# Version is the single source of truth in Cargo.toml — maturin reads it from there.
+dynamic = ["version"]
 description = "A superset of ruff: runs ruff internally, adds built-in rules, and supports user-defined plugin executables"
 readme = "README.md"
 license = { text = "MIT" }
@@ -23,16 +24,12 @@ dependencies = [
     "ruff>=0.11.0",
 ]
 
-[project.scripts]
-ruffian = "ruffian:main"
-
 [project.urls]
 Repository = "https://github.com/tluolamo/ruffian"
 Issues = "https://github.com/tluolamo/ruffian/issues"
 
 [tool.maturin]
 bindings = "bin"
-strip = true
 
 # ruffian's own config lives here; ruff reads its own [tool.ruff] section directly
 [tool.ruffian]

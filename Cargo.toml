@@ -22,6 +22,7 @@ tokio = { version = "1", features = ["full"] }
 
 # Parallel file processing for built-in rules
 rayon = "1"
+ignore = "0.4"
 
 # Serialization — ruff JSON output + plugin contract
 serde = { version = "1", features = ["derive"] }
@@ -46,8 +47,13 @@ ruff_text_size = { git = "https://github.com/astral-sh/ruff", tag = "0.11.2" }
 # Integration test helpers
 assert_cmd = "2"
 predicates = "3"
+serde_json = "1"
 tempfile = "3"
 
 [[test]]
 name = "integration"
 path = "tests/integration/test_check.rs"
+
+[[test]]
+name = "output_fidelity"
+path = "tests/integration/test_output_fidelity.rs"

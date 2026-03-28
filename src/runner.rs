@@ -1,4 +1,5 @@
 use anyhow::Result;
+use ignore::WalkBuilder;
 
 use crate::{config, output, plugin, ruff, rules};
 
@@ -11,6 +12,14 @@ pub fn run_check(
 ) -> Result<()> {
     let cwd = std::env::current_dir()?;
     let cfg = config::load(&cwd)?;
+
+    // Ruff handles directory expansion itself, but built-in rules operate on individual
+    // files — expand any directories to .py files, honouring .gitignore and ruff's
+    // default excludes so we don't check .venv, __pycache__, dist, etc.
+    let py_files: Vec<String> = files
+        .iter()
+        .flat_map(|path| expand_py_files(path))
+        .collect();
 
     // Merge CLI selects/ignores with config file values.
     let effective_select: Vec<String> = if select.is_empty() {
@@ -35,7 +44,7 @@ pub fn run_check(
         ruff::check(&files_clone, &extra)
     });
 
-    let files_clone2 = files.clone();
+    let files_clone2 = py_files.clone();
     let select_clone = effective_select.clone();
     let ignore_clone = effective_ignore.clone();
     let rules_config = cfg.rules.clone();
@@ -44,7 +53,7 @@ pub fn run_check(
     });
 
     let plugins = cfg.plugins.clone();
-    let files_clone3 = files.clone();
+    let files_clone3 = py_files.clone();
     let version = env!("CARGO_PKG_VERSION");
     let plugins_handle = std::thread::spawn(move || -> Result<Vec<ruff::Violation>> {
         let mut all = vec![];
@@ -74,4 +83,58 @@ pub fn run_check(
         std::process::exit(1);
     }
     Ok(())
+}
+
+// Ruff's default excludes — kept in sync with:
+// https://docs.astral.sh/ruff/settings/#exclude
+const RUFF_DEFAULT_EXCLUDES: &[&str] = &[
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+];
+
+fn expand_py_files(root: &str) -> Vec<String> {
+    let path = std::path::Path::new(root);
+    if path.is_file() {
+        return vec![root.to_owned()];
+    }
+
+    let mut builder = WalkBuilder::new(root);
+    builder.standard_filters(true); // respects .gitignore, .ignore, etc.
+    for dir in RUFF_DEFAULT_EXCLUDES {
+        builder.filter_entry(move |e| {
+            !(e.file_type().map(|t| t.is_dir()).unwrap_or(false)
+                && e.file_name().to_str() == Some(dir))
+        });
+    }
+
+    builder
+        .build()
+        .filter_map(|e| e.ok())
+        .filter(|e| e.file_type().map(|t| t.is_file()).unwrap_or(false))
+        .filter(|e| e.path().extension().and_then(|s| s.to_str()) == Some("py"))
+        .map(|e| e.path().to_string_lossy().into_owned())
+        .collect()
 }

@@ -79,4 +79,5 @@ Snake_case rule name, no code prefix — mirrors ruff's own convention:
 
 - One rule per file in `src/rules/`; register it in `src/rules/mod.rs` — no other changes required
 - Plugin contract is documented in `PLAN.md` and must not be broken without a major version bump
-- All public API changes should be reflected in `CHANGELOG.md`
+- Update `CHANGELOG.md` under `[Unreleased]` for any user-visible change: new rules, new CLI flags, behaviour changes, breaking changes, bug fixes, and new config options. Internal refactors and test-only changes do not need entries.
+- **Version is the single source of truth in `Cargo.toml`** — `pyproject.toml` uses `dynamic = ["version"]` and maturin reads the version from Cargo.toml automatically. Only bump the version in `Cargo.toml`.

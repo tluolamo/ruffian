@@ -23,6 +23,10 @@ tasks:
       - "{{.RUSTUP}} component add llvm-tools-preview"
       - "{{.CARGO}} install cargo-llvm-cov --quiet"
 
+  install:local:
+    desc: Build and install ruffian into the active Python environment for local testing
+    cmd: maturin develop --release
+
   build:
     desc: Build the ruffian binary (debug)
     cmd: "{{.CARGO}} build"

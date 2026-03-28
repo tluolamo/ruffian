@@ -250,14 +250,14 @@ Users replace `ruff` with `ruffian` everywhere:
 - [x] Cargo project with clap CLI matching ruff's `check` / `format` / `--help` surface
 - [x] `ruff format` passthrough (exec ruff directly)
 - [x] `ruff check` passthrough via subprocess, parse JSON, re-emit text output
-- [ ] Output format matches ruff exactly (verified by diff tests)
+- [x] Output format matches ruff exactly (verified by diff tests) — matches `ruff check --output-format concise --quiet`
 - [ ] maturin packaging, basic PyPI publish
 
 Milestone: `ruffian check .` and `ruff check .` produce identical output on a project with no custom rules.
 
 ### Phase 2 — First built-in rule (v0.2)
 
-- [ ] `ParsedFile` struct wrapping `ruff_python_parser` output (struct exists but currently holds raw source — AST integration pending)
+- [x] `ParsedFile` struct wrapping `ruff_python_parser` output — holds raw source + `Option<Parsed<ModModule>>` (populated via `parse_module`; `None` on syntax error)
 - [x] `Rule` trait + rule registry
 - [x] `PLC0302` too-many-module-lines (configurable, default 1000)
 - [x] Config parsing from `pyproject.toml` `[tool.ruffian]`

@@ -1,4 +1,5 @@
 use assert_cmd::Command;
+use serde_json::Value;
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
 use tempfile::TempDir;
@@ -240,6 +241,126 @@ fn plugin_nonzero_exit_does_not_count_as_lint_failure() {
         .args(["check", file.to_str().unwrap()])
         .assert()
         .success();
+}
+
+#[test]
+fn json_output_is_valid_json_array() {
+    let dir = TempDir::new().unwrap();
+    let file = dir.path().join("bad.py");
+    fs::write(&file, "import os\nx = 1\n").unwrap();
+
+    let output = cmd()
+        .args(["check", "--output-format", "json", file.to_str().unwrap()])
+        .output()
+        .unwrap();
+
+    let parsed: Value = serde_json::from_slice(&output.stdout).expect("stdout must be valid JSON");
+    assert!(parsed.is_array(), "JSON output must be an array");
+}
+
+#[test]
+fn json_output_contains_required_violation_fields() {
+    let dir = TempDir::new().unwrap();
+    let file = dir.path().join("bad.py");
+    fs::write(&file, "import os\nx = 1\n").unwrap();
+
+    let output = cmd()
+        .args(["check", "--output-format", "json", file.to_str().unwrap()])
+        .output()
+        .unwrap();
+
+    let violations: Vec<Value> =
+        serde_json::from_slice(&output.stdout).expect("stdout must be valid JSON");
+    assert!(!violations.is_empty(), "expected at least one violation");
+
+    let v = &violations[0];
+    assert!(v["code"].is_string(), "violation must have a string 'code'");
+    assert!(
+        v["message"].is_string(),
+        "violation must have a string 'message'"
+    );
+    assert!(
+        v["filename"].is_string(),
+        "violation must have a string 'filename'"
+    );
+    assert!(
+        v["location"]["row"].is_number(),
+        "violation must have a numeric 'location.row'"
+    );
+    assert!(
+        v["location"]["column"].is_number(),
+        "violation must have a numeric 'location.column'"
+    );
+}
+
+#[test]
+fn json_output_includes_ruffian_violations() {
+    let dir = TempDir::new().unwrap();
+    let file = dir.path().join("long.py");
+    let content: String = (1..=1001).map(|i| format!("x{i} = {i}\n")).collect();
+    fs::write(&file, content).unwrap();
+
+    fs::write(
+        dir.path().join("pyproject.toml"),
+        "[tool.ruffian]\nselect = [\"PLC0302\"]\n",
+    )
+    .unwrap();
+
+    let output = cmd()
+        .current_dir(&dir)
+        .args(["check", "--output-format", "json", file.to_str().unwrap()])
+        .output()
+        .unwrap();
+
+    let violations: Vec<Value> =
+        serde_json::from_slice(&output.stdout).expect("stdout must be valid JSON");
+
+    let has_plc0302 = violations
+        .iter()
+        .any(|v| v["code"].as_str() == Some("PLC0302"));
+    assert!(has_plc0302, "expected PLC0302 violation in JSON output");
+}
+
+#[test]
+fn json_output_is_empty_array_for_clean_file() {
+    let dir = TempDir::new().unwrap();
+    let file = dir.path().join("clean.py");
+    fs::write(&file, "x = 1\n").unwrap();
+
+    let output = cmd()
+        .args([
+            "check",
+            "--output-format",
+            "json",
+            "--ignore",
+            "PLC0302",
+            file.to_str().unwrap(),
+        ])
+        .output()
+        .unwrap();
+
+    let violations: Vec<Value> =
+        serde_json::from_slice(&output.stdout).expect("stdout must be valid JSON");
+    assert!(violations.is_empty(), "expected empty array for clean file");
+}
+
+#[test]
+fn fix_flag_applies_ruff_fixes_and_exits_zero() {
+    let dir = TempDir::new().unwrap();
+    let file = dir.path().join("fixable.py");
+    // F401 — unused import; ruff can auto-fix this.
+    fs::write(&file, "import os\nx = 1\n").unwrap();
+
+    cmd()
+        .args(["check", "--fix", file.to_str().unwrap()])
+        .assert()
+        .success();
+
+    let fixed = fs::read_to_string(&file).unwrap();
+    assert!(
+        !fixed.contains("import os"),
+        "expected ruff --fix to remove unused import, got: {fixed}"
+    );
 }
 
 #[test]

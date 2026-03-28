@@ -1,9 +1,14 @@
 use crate::ruff::Violation;
+use ruff_python_ast::ModModule;
+use ruff_python_parser::Parsed;
 
 /// Parsed representation of a Python source file passed to each rule.
+#[allow(dead_code)] // `ast` is provided for rule authors; not all rules use it yet
 pub struct ParsedFile {
     pub path: String,
     pub source: String,
+    /// Parsed AST. `None` if the file contained syntax errors.
+    pub ast: Option<Parsed<ModModule>>,
 }
 
 /// Every built-in rule implements this trait.

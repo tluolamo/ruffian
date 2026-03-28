@@ -38,6 +38,8 @@ ruffian check src/ --output-format json
 
 ruffian accepts the same flags as `ruff check` for the options it passes through. Run `ruffian --help` for the full list.
 
+> **Output format note:** ruffian's text output matches `ruff check --output-format concise --quiet` — one `path:row:col: CODE [*] message` line per violation, no source context or summary footer. Use `--output-format json` for full detail.
+
 ---
 
 ## Configuration
@@ -201,6 +203,16 @@ pub trait Rule: Send + Sync {
     fn check(&self, file: &ParsedFile) -> Vec<Violation>;
 }
 ```
+
+`ParsedFile` exposes two fields:
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `path` | `String` | Absolute path to the file |
+| `source` | `String` | Raw source text |
+| `ast` | `Option<Parsed<ModModule>>` | Parsed AST from `ruff_python_parser`; `None` if the file has syntax errors |
+
+For source-level checks (line count, regex, etc.) use `file.source`. For structural checks use `file.ast.as_ref().map(|p| p.syntax())` to get the `ModModule` and walk the statement list.
 
 2. Register it in `src/rules/mod.rs` — one line in `all_rules()`. No other changes required.
 

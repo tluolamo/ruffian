@@ -6,6 +6,7 @@ pub use rule::{ParsedFile, Rule};
 use crate::ruff::Violation;
 use anyhow::Result;
 use rayon::prelude::*;
+use ruff_python_parser::parse_module;
 use std::collections::HashMap;
 
 // ── Rule registry ────────────────────────────────────────────────────────────
@@ -40,9 +41,11 @@ pub fn run_all(
                     return vec![];
                 }
             };
+            let ast = parse_module(&source).ok();
             let parsed = ParsedFile {
                 path: path.clone(),
                 source,
+                ast,
             };
             active_rules
                 .iter()
