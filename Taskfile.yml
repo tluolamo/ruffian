@@ -69,6 +69,12 @@ tasks:
     desc: Check formatting without writing changes
     cmd: "{{.CARGO}} fmt -- --check"
 
+  ruff:update:
+    desc: Update ruff git dependency pins to the latest release
+    cmds:
+      - python3 scripts/update_ruff.py
+      - "{{.CARGO}} build"
+
   clean:
     desc: Remove build artifacts
     cmd: "{{.CARGO}} clean"
