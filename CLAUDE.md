@@ -45,6 +45,34 @@
 - All common commands (build, test, lint, publish) have corresponding Taskfile tasks
 - Use `task` to run anything; do not rely on bare `cargo` invocations in documentation
 
+## Rule naming conventions
+
+Ruffian follows ruff's own conventions as closely as possible.
+
+### Prefixes
+
+| Prefix | Used for | Example |
+|--------|----------|---------|
+| `PLC`, `PLE`, `PLR`, `PLW` | Rules sourced from pylint that ruff has not implemented — follow ruff's `PL` convention exactly | `PLC0302` |
+| `RFN` | Novel built-in rules with no upstream source in any existing linter | `RFN001` |
+| `RFC` | User-defined plugin rules — **reserved for plugin authors, never used by ruffian itself** | `RFC001` |
+
+- If a rule exists in pylint and ruff hasn't implemented it, use the `PL`-prefixed pylint code (`PLC0302`, `PLR0914`, etc.). Since ruffian only implements rules ruff skipped, there is no overlap with ruff's own `PL` codes.
+- Only use `RFN` for rules that have no equivalent in any existing linter.
+- Plugin authors **must** use the `RFC` prefix to avoid collisions with ruffian built-ins.
+
+### File names
+
+Snake_case rule name, no code prefix — mirrors ruff's own convention:
+- `too_many_module_lines.rs` ✓ (ruff uses `too_many_arguments.rs`, not `plr0913_too_many_arguments.rs`)
+
+### Adding a rule checklist
+
+1. Determine the correct prefix (pylint code → use it; novel → `RFN`)
+2. Name the file after the rule name in snake_case
+3. Add a comment at the top of the file noting the pylint/upstream source if one exists
+4. Register one line in `src/rules/mod.rs`
+
 ## Contributing
 
 - One rule per file in `src/rules/`; register it in `src/rules/mod.rs` — no other changes required

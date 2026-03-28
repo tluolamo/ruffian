@@ -23,7 +23,7 @@ def check_file(path: str) -> list[dict]:
         col = line.find("TODO")
         if col != -1:
             violations.append({
-                "code": "PLG001",
+                "code": "RFC001",
                 "message": "TODO comment found",
                 "filename": path,
                 "location": {"row": row, "column": col},

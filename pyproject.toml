@@ -27,8 +27,8 @@ dependencies = [
 ruffian = "ruffian:main"
 
 [project.urls]
-Repository = "https://github.com/tuukkamustonen/ruffian"
-Issues = "https://github.com/tuukkamustonen/ruffian/issues"
+Repository = "https://github.com/tluolamo/ruffian"
+Issues = "https://github.com/tluolamo/ruffian/issues"
 
 [tool.maturin]
 bindings = "bin"
@@ -36,5 +36,5 @@ strip = true
 
 # ruffian's own config lives here; ruff reads its own [tool.ruff] section directly
 [tool.ruffian]
-select = []
+select = []   # empty = all built-in rules enabled (e.g. ["C0302", "RFN001"])
 ignore = []

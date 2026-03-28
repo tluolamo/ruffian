@@ -2,10 +2,9 @@
 name = "ruffian"
 version = "0.1.0"
 edition = "2021"
-rust-edition = "2021"
 description = "A superset of ruff: runs ruff internally, adds built-in rules, and supports user-defined plugin executables"
 license = "MIT"
-repository = "https://github.com/tuukkamustonen/ruffian"
+repository = "https://github.com/tluolamo/ruffian"
 keywords = ["python", "linter", "ruff"]
 categories = ["command-line-utilities", "development-tools"]
 readme = "README.md"

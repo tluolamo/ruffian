@@ -1,3 +1,8 @@
+// PLC0302 — too-many-module-lines
+//
+// Pylint source: C0302 (too-many-lines). Ruff does not implement this rule.
+// Prefixed PL following ruff's convention (PLR0913, PLR0912, etc.).
+
 use crate::ruff::{Location, Violation};
 use crate::rules::rule::{ParsedFile, Rule};
 
@@ -15,7 +20,7 @@ impl Default for TooManyModuleLines {
 
 impl Rule for TooManyModuleLines {
     fn code(&self) -> &'static str {
-        "RFN001"
+        "PLC0302"
     }
 
     fn name(&self) -> &'static str {

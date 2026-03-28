@@ -19,16 +19,16 @@ fn check_clean_file_exits_zero() {
 }
 
 #[test]
-fn rfn001_fires_on_long_file() {
+fn plc0302_fires_on_long_file() {
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("long.py");
-    // Write a file with 1001 lines to trigger RFN001 (default 1000).
+    // Write a file with 1001 lines to trigger PLC0302 (default 1000).
     let content: String = (1..=1001).map(|i| format!("x{i} = {i}\n")).collect();
     fs::write(&file, content).unwrap();
 
-    // Write a minimal pyproject.toml enabling RFN001.
+    // Write a minimal pyproject.toml enabling PLC0302.
     let cfg = dir.path().join("pyproject.toml");
-    fs::write(&cfg, "[tool.ruffian]\nselect = [\"RFN001\"]\n").unwrap();
+    fs::write(&cfg, "[tool.ruffian]\nselect = [\"PLC0302\"]\n").unwrap();
 
     cmd()
         .current_dir(&dir)

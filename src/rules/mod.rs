@@ -1,5 +1,5 @@
 mod rule;
-mod rfn001_too_many_module_lines;
+mod too_many_module_lines;
 
 pub use rule::{ParsedFile, Rule};
 
@@ -12,7 +12,7 @@ use std::path::Path;
 // Add one line here for each new rule. No other changes required.
 fn all_rules() -> Vec<Box<dyn Rule>> {
     vec![
-        Box::new(rfn001_too_many_module_lines::TooManyModuleLines::default()),
+        Box::new(too_many_module_lines::TooManyModuleLines::default()),
     ]
 }
 // ─────────────────────────────────────────────────────────────────────────────
