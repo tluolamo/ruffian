@@ -1,5 +1,6 @@
 # ruffian
 
+[![PyPI](https://img.shields.io/pypi/v/ruffian)](https://pypi.org/project/ruffian/)
 ![ruff 0.15.8](https://img.shields.io/badge/ruff-0.15.8-30173D)
 
 > *A ruffian breaks rules. This tool adds the ones ruff refused.*
