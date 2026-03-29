@@ -82,13 +82,13 @@ fn plc0302_does_not_fire_at_exact_limit() {
 fn plc0302_respects_custom_max_lines_from_config() {
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("short.py");
-    // 6 lines — only triggers if max-lines is set to 5.
+    // 6 lines — only triggers if max-module-lines is set to 5.
     let content: String = (1..=6).map(|i| format!("x{i} = {i}\n")).collect();
     fs::write(&file, content).unwrap();
 
     fs::write(
         dir.path().join("pyproject.toml"),
-        "[tool.ruffian]\nselect = [\"PLC0302\"]\n\n[tool.ruffian.rules.PLC0302]\nmax-lines = 5\n",
+        "[tool.ruffian]\nselect = [\"PLC0302\"]\n\n[tool.ruffian.rules.PLC0302]\nmax-module-lines = 5\n",
     )
     .unwrap();
 
@@ -342,6 +342,26 @@ fn json_output_is_empty_array_for_clean_file() {
     let violations: Vec<Value> =
         serde_json::from_slice(&output.stdout).expect("stdout must be valid JSON");
     assert!(violations.is_empty(), "expected empty array for clean file");
+}
+
+#[test]
+fn plc0302_respects_legacy_max_lines_key() {
+    let dir = TempDir::new().unwrap();
+    let file = dir.path().join("short.py");
+    let content: String = (1..=6).map(|i| format!("x{i} = {i}\n")).collect();
+    fs::write(&file, content).unwrap();
+
+    fs::write(
+        dir.path().join("pyproject.toml"),
+        "[tool.ruffian]\nselect = [\"PLC0302\"]\n\n[tool.ruffian.rules.PLC0302]\nmax-lines = 5\n",
+    )
+    .unwrap();
+
+    cmd()
+        .current_dir(&dir)
+        .args(["check", file.to_str().unwrap()])
+        .assert()
+        .failure();
 }
 
 #[test]

@@ -22,8 +22,10 @@ impl Default for TooManyModuleLines {
 
 impl TooManyModuleLines {
     pub fn from_config(val: Option<&toml::Value>) -> Self {
+        // Accept `max-module-lines` (pylint's name) or `max-lines` (ruffian v0.1 compat).
+        // `max-module-lines` takes precedence when both are present.
         let max_lines = val
-            .and_then(|v| v.get("max-lines"))
+            .and_then(|v| v.get("max-module-lines").or_else(|| v.get("max-lines")))
             .and_then(|v| v.as_integer())
             .map(|n| n as usize)
             .unwrap_or(DEFAULT_MAX_LINES);

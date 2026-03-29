@@ -68,7 +68,7 @@ select = ["PLC0302"]   # built-in rules to enable (empty = all enabled)
 ignore = []
 
 [tool.ruffian.rules.PLC0302]
-max-lines = 800        # override the default (1000)
+max-module-lines = 800   # override the default (1000); `max-lines` also accepted for compatibility
 
 # User plugins
 [[tool.ruffian.plugins]]
@@ -101,7 +101,7 @@ Reports Python modules that exceed a configurable line count. Encourages splitti
 
 ```toml
 [tool.ruffian.rules.PLC0302]
-max-lines = 800   # default: 1000
+max-module-lines = 800   # default: 1000; `max-lines` also accepted for v0.1 compatibility
 ```
 
 To raise the limit or disable the rule globally:
