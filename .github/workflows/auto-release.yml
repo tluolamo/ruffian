@@ -1,0 +1,33 @@
+name: Auto-release after ruff upgrade
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    name: Create release if ruff upgrade merged
+    runs-on: ubuntu-latest
+    # Only trigger when the commit looks like an automated ruff upgrade
+    if: startsWith(github.event.head_commit.message, 'chore: upgrade ruff to')
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Read version from Cargo.toml
+        id: version
+        run: |
+          VERSION=$(python3 -c "import re,pathlib; print(re.search(r'^version = \"([^\"]+)\"', pathlib.Path('Cargo.toml').read_text(), re.MULTILINE).group(1))")
+          RUFF_VERSION=$(python3 -c "import re,pathlib; print(re.search(r'tag = \"([^\"]+)\"', pathlib.Path('Cargo.toml').read_text()).group(1))")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "ruff_version=$RUFF_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          RUFF_VERSION=${{ steps.version.outputs.ruff_version }}
+          gh release create "v${VERSION}" \
+            --title "ruffian v${VERSION}" \
+            --notes "Dependency upgrade: built against ruff ${RUFF_VERSION}."

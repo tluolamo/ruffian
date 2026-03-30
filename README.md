@@ -283,7 +283,7 @@ pub trait Rule: Send + Sync {
 }
 ```
 
-`ParsedFile` exposes two fields:
+`ParsedFile` exposes three fields:
 
 | Field | Type | Notes |
 |-------|------|-------|

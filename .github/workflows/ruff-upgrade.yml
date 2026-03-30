@@ -1,0 +1,87 @@
+name: Ruff upgrade
+
+on:
+  schedule:
+    - cron: "0 9 * * 5"  # Every Friday at 09:00 UTC (ruff typically releases on Thursdays)
+  workflow_dispatch:       # Allow manual trigger
+
+jobs:
+  upgrade:
+    name: Check and upgrade ruff
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
+      - name: Run ruff update
+        id: update
+        run: python3 scripts/update_ruff.py
+
+      - name: Check if anything changed
+        id: diff
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "new_version=$(python3 -c "import re,pathlib; m=re.search(r'tag = \"([^\"]+)\"', pathlib.Path('Cargo.toml').read_text()); print(m.group(1))")" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Bump ruffian version
+        if: steps.diff.outputs.changed == 'true'
+        run: python3 scripts/bump_version.py
+
+      - name: Update Cargo.lock
+        if: steps.diff.outputs.changed == 'true'
+        run: cargo generate-lockfile
+
+      - name: Configure git
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create pull request
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          RUFF_VERSION=${{ steps.diff.outputs.new_version }}
+          BRANCH="ruff-upgrade-${RUFF_VERSION}"
+          git checkout -b "$BRANCH"
+          git add Cargo.toml Cargo.lock pyproject.toml README.md
+          git commit -m "chore: upgrade ruff to ${RUFF_VERSION}"
+          git push origin "$BRANCH"
+          gh pr create \
+            --title "chore: upgrade ruff to ${RUFF_VERSION}" \
+            --body "Automated ruff dependency upgrade to ${RUFF_VERSION}.
+
+          **Changes:**
+          - Bumped ruff git dependency pins in \`Cargo.toml\`
+          - Updated minimum ruff version in \`pyproject.toml\`
+          - Updated ruff version badge in \`README.md\`
+          - Bumped ruffian version (minor)
+
+          This PR was created automatically by the ruff upgrade workflow and will be auto-approved once CI passes." \
+            --label "dependencies" \
+            --base main \
+            --head "$BRANCH"
