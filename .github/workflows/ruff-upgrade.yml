@@ -9,6 +9,9 @@ jobs:
   upgrade:
     name: Check and upgrade ruff
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v5
