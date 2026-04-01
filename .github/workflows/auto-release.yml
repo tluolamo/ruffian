@@ -1,20 +1,49 @@
 name: Auto-release after ruff upgrade
 
 on:
-  push:
-    branches: [main]
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: read
 
 jobs:
   release:
     name: Create release if ruff upgrade merged
     runs-on: ubuntu-latest
-    # Only trigger when the commit looks like an automated ruff upgrade
-    if: "${{ startsWith(github.event.head_commit.message, 'chore: upgrade ruff to') }}"
+    if: >-
+      ${{ github.event.workflow_run.conclusion == 'success'
+          && github.event.workflow_run.event == 'push'
+          && github.event.workflow_run.head_branch == 'main' }}
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Validate triggering PR
+        id: guard
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          set -euo pipefail
+          SHA="${{ github.event.workflow_run.head_sha }}"
+
+          MATCHING_COUNT=$(gh api \
+            -H "Accept: application/vnd.github+json" \
+            "/repos/${{ github.repository }}/commits/${SHA}/pulls" \
+            --jq '[.[] | select(.merged_at != null and .base.ref == "main" and (.title | startswith("chore: upgrade ruff to")) and (.head.ref | startswith("ruff-upgrade-")))] | length')
+
+          if [ "${MATCHING_COUNT}" -gt 0 ]; then
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Read version from Cargo.toml
+        if: steps.guard.outputs.should_release == 'true'
         id: version
         run: |
           VERSION=$(python3 -c "import re,pathlib; print(re.search(r'^version = \"([^\"]+)\"', pathlib.Path('Cargo.toml').read_text(), re.MULTILINE).group(1))")
@@ -23,6 +52,7 @@ jobs:
           echo "ruff_version=$RUFF_VERSION" >> $GITHUB_OUTPUT
 
       - name: Create GitHub release
+        if: steps.guard.outputs.should_release == 'true'
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
