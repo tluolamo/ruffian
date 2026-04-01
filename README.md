@@ -1,6 +1,7 @@
 # ruffian
 
 [![PyPI](https://img.shields.io/pypi/v/ruffian)](https://pypi.org/project/ruffian/)
+[![Wheel](https://img.shields.io/pypi/wheel/ruffian)](https://pypi.org/project/ruffian/)
 [![Downloads](https://static.pepy.tech/badge/ruffian)](https://pepy.tech/projects/ruffian)
 [![CI](https://github.com/tluolamo/ruffian/actions/workflows/ci.yml/badge.svg)](https://github.com/tluolamo/ruffian/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
