@@ -21,6 +21,8 @@ jobs:
     steps:
       - name: Validate triggering PR
         id: guard
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           SHA="${{ github.event.workflow_run.head_sha }}"
@@ -39,6 +41,8 @@ jobs:
       - name: Read version from Cargo.toml
         if: steps.guard.outputs.should_release == 'true'
         id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           CARGO_TOML=$(gh api \
             -H "Accept: application/vnd.github.v3.raw" \
