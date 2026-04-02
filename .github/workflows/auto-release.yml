@@ -19,14 +19,8 @@ jobs:
           && github.event.workflow_run.head_branch == 'main' }}
 
     steps:
-      - uses: actions/checkout@v5
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
-
       - name: Validate triggering PR
         id: guard
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           set -euo pipefail
           SHA="${{ github.event.workflow_run.head_sha }}"
@@ -46,8 +40,12 @@ jobs:
         if: steps.guard.outputs.should_release == 'true'
         id: version
         run: |
-          VERSION=$(python3 -c "import re,pathlib; print(re.search(r'^version = \"([^\"]+)\"', pathlib.Path('Cargo.toml').read_text(), re.MULTILINE).group(1))")
-          RUFF_VERSION=$(python3 -c "import re,pathlib; print(re.search(r'tag = \"([^\"]+)\"', pathlib.Path('Cargo.toml').read_text()).group(1))")
+          CARGO_TOML=$(gh api \
+            -H "Accept: application/vnd.github.v3.raw" \
+            "/repos/${{ github.repository }}/contents/Cargo.toml" \
+            --jq -r '.content' | base64 -d)
+          VERSION=$(echo "$CARGO_TOML" | python3 -c "import re,sys; m=re.search(r'^version = \"([^\"]+)\"', sys.stdin.read(), re.MULTILINE); print(m.group(1) if m else '')")
+          RUFF_VERSION=$(echo "$CARGO_TOML" | python3 -c "import re,sys; m=re.search(r'tag = \"([^\"]+)\"', sys.stdin.read()); print(m.group(1) if m else '')")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "ruff_version=$RUFF_VERSION" >> $GITHUB_OUTPUT
 
