@@ -73,10 +73,21 @@ jobs:
           git checkout -b "$BRANCH"
           git add Cargo.toml Cargo.lock pyproject.toml README.md
           git commit -m "chore: upgrade ruff to ${RUFF_VERSION}"
-          git push origin "$BRANCH"
-          gh pr create \
-            --title "chore: upgrade ruff to ${RUFF_VERSION}" \
-            --body "Automated ruff dependency upgrade to ${RUFF_VERSION}.
+          git push --force origin "$BRANCH"
+
+          EXISTING_PR=$(gh pr list \
+            --base main \
+            --head "$BRANCH" \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')
+
+          if [ -n "$EXISTING_PR" ]; then
+            echo "PR #$EXISTING_PR already exists for $BRANCH; skipping creation."
+          else
+            gh pr create \
+              --title "chore: upgrade ruff to ${RUFF_VERSION}" \
+              --body "Automated ruff dependency upgrade to ${RUFF_VERSION}.
 
           **Changes:**
           - Bumped ruff git dependency pins in \`Cargo.toml\`
@@ -85,6 +96,7 @@ jobs:
           - Bumped ruffian version (minor)
 
           This PR was created automatically by the ruff upgrade workflow and will be auto-approved once CI passes." \
-            --label "dependencies" \
-            --base main \
-            --head "$BRANCH"
+              --label "dependencies" \
+              --base main \
+              --head "$BRANCH"
+          fi
