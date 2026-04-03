@@ -21,7 +21,7 @@ classifiers = [
     "Topic :: Software Development :: Quality Assurance",
 ]
 dependencies = [
-    "ruff>=0.15.8",
+    "ruff>=0.15.9",
 ]
 
 [project.urls]
