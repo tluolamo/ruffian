@@ -18,6 +18,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
@@ -69,6 +70,10 @@ def confirm(prompt: str) -> bool:
     except (KeyboardInterrupt, EOFError):
         print()
         return False
+
+
+def parse_github_timestamp(timestamp: str) -> datetime:
+    return datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
 
 
 # ── steps ────────────────────────────────────────────────────────────────────
@@ -127,6 +132,46 @@ def wait_for_ci() -> None:
         abort("CI failed — fix the issues before releasing")
 
 
+def wait_for_publish_workflow(started_after: datetime) -> None:
+    print("Waiting for publish workflow to start", end="", flush=True)
+    run_id = None
+    repo = gh("repo", "view", "--json", "nameWithOwner")["nameWithOwner"]
+
+    for _ in range(36):  # up to 3 minutes
+        runs = gh(
+            "run",
+            "list",
+            "--repo",
+            repo,
+            "--workflow",
+            "publish.yml",
+            "--limit",
+            "20",
+            "--json",
+            "databaseId,workflowName,event,createdAt",
+        ) or []
+        publish_runs = [
+            run for run in runs
+            if run.get("workflowName") == "Publish"
+            and run.get("event") == "release"
+            and parse_github_timestamp(run["createdAt"]) >= started_after
+        ]
+        if publish_runs:
+            run_id = publish_runs[0]["databaseId"]
+            break
+        print(".", end="", flush=True)
+        time.sleep(5)
+    print()
+
+    if not run_id:
+        abort("timed out waiting for publish workflow — check GitHub Actions manually")
+
+    print(f"Watching publish workflow run {run_id}...")
+    result = subprocess.run(["gh", "run", "watch", str(run_id), "--exit-status"], cwd=ROOT)
+    if result.returncode != 0:
+        abort("publish workflow failed — check GitHub Actions before announcing the release")
+
+
 def get_release_notes(version: str) -> str:
     repo = gh("repo", "view", "--json", "nameWithOwner")["nameWithOwner"]
     tag = f"v{version}"
@@ -176,7 +221,9 @@ def main() -> None:
     if confirm("Open $EDITOR to review / rewrite the notes?"):
         notes = edit_notes(notes)
 
+    release_started_after = datetime.now(timezone.utc) - timedelta(seconds=5)
     create_release(version, notes)
+    wait_for_publish_workflow(release_started_after)
 
 
 if __name__ == "__main__":

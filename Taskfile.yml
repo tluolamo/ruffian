@@ -81,7 +81,7 @@ tasks:
       - git push
 
   release:
-    desc: "Create a GitHub release: checks version, waits for CI, generates notes, opens editor, publishes. Usage: task release"
+    desc: "Create a GitHub release: checks version, waits for CI, generates notes, opens editor, then waits for publish to finish. Usage: task release"
     cmd: python3 scripts/create_release.py
 
   ruff:update:
