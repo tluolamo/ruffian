@@ -1,6 +1,6 @@
 [package]
 name = "ruffian"
-version = "0.7.0"
+version = "0.8.0"
 edition = "2021"
 description = "A superset of ruff: runs ruff internally, adds built-in rules, and supports user-defined plugin executables"
 license = "MIT"
@@ -38,10 +38,10 @@ anyhow = "1"
 # Python AST parsing — pulled from the ruff git repo.
 # NOTE: ruff does not publish these as standalone crates on crates.io.
 # Pin tightly; update deliberately when upgrading ruff compatibility.
-ruff_python_ast = { git = "https://github.com/astral-sh/ruff", tag = "0.15.10" }
-ruff_python_parser = { git = "https://github.com/astral-sh/ruff", tag = "0.15.10" }
-ruff_source_file = { git = "https://github.com/astral-sh/ruff", tag = "0.15.10" }
-ruff_text_size = { git = "https://github.com/astral-sh/ruff", tag = "0.15.10" }
+ruff_python_ast = { git = "https://github.com/astral-sh/ruff", tag = "0.15.11" }
+ruff_python_parser = { git = "https://github.com/astral-sh/ruff", tag = "0.15.11" }
+ruff_source_file = { git = "https://github.com/astral-sh/ruff", tag = "0.15.11" }
+ruff_text_size = { git = "https://github.com/astral-sh/ruff", tag = "0.15.11" }
 
 [dev-dependencies]
 # Integration test helpers
