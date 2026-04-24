@@ -60,5 +60,6 @@ jobs:
           VERSION=${{ steps.version.outputs.version }}
           RUFF_VERSION=${{ steps.version.outputs.ruff_version }}
           gh release create "v${VERSION}" \
+            --repo "${{ github.repository }}" \
             --title "ruffian v${VERSION}" \
             --notes "Dependency upgrade: built against ruff ${RUFF_VERSION}."
