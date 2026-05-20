@@ -45,8 +45,7 @@ jobs:
         run: |
           CARGO_TOML=$(gh api \
             -H "Accept: application/vnd.github.v3.raw" \
-            "/repos/${{ github.repository }}/contents/Cargo.toml" \
-            --jq -r '.content' | base64 -d)
+            "/repos/${{ github.repository }}/contents/Cargo.toml")
           VERSION=$(echo "$CARGO_TOML" | python3 -c "import re,sys; m=re.search(r'^version = \"([^\"]+)\"', sys.stdin.read(), re.MULTILINE); print(m.group(1) if m else '')")
           RUFF_VERSION=$(echo "$CARGO_TOML" | python3 -c "import re,sys; m=re.search(r'tag = \"([^\"]+)\"', sys.stdin.read()); print(m.group(1) if m else '')")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
