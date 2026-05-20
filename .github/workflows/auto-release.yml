@@ -51,6 +51,21 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "ruff_version=$RUFF_VERSION" >> $GITHUB_OUTPUT
 
+      - name: Validate versions
+        if: steps.guard.outputs.should_release == 'true'
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.version.outputs.version }}"
+          RUFF_VERSION="${{ steps.version.outputs.ruff_version }}"
+          if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Invalid ruffian version: '${VERSION}'"
+            exit 1
+          fi
+          if ! echo "$RUFF_VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Invalid ruff version: '${RUFF_VERSION}'"
+            exit 1
+          fi
+
       - name: Create GitHub release
         if: steps.guard.outputs.should_release == 'true'
         env:
