@@ -50,6 +50,24 @@ jobs:
           fi
           echo "All changed files are expected — safe to auto-approve."
 
+      - name: Debug merge state
+        run: |
+          set -euo pipefail
+          PR="${{ github.event.pull_request.number }}"
+          SHA="${{ github.event.pull_request.head.sha }}"
+
+          echo "=== Required status checks on main ==="
+          gh api repos/${{ github.repository }}/branches/main/protection/required_status_checks \
+            --jq '.checks[] | "\(.context) (app_id: \(.app_id))"'
+
+          echo "=== Check runs on head commit $SHA ==="
+          gh api repos/${{ github.repository }}/commits/$SHA/check-runs \
+            --jq '.check_runs[] | "\(.name) [\(.status)/\(.conclusion)] workflow=\(.details_url)"'
+
+          echo "=== PR mergeable state ==="
+          gh api repos/${{ github.repository }}/pulls/$PR \
+            --jq '"mergeable=\(.mergeable) mergeable_state=\(.mergeable_state)"'
+
       - name: Enable auto-merge
         run: |
           gh pr merge ${{ github.event.pull_request.number }} \
