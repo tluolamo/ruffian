@@ -51,14 +51,14 @@ jobs:
           echo "All changed files are expected — safe to auto-approve."
 
       - name: Debug merge state
+        continue-on-error: true
         run: |
-          set -euo pipefail
           PR="${{ github.event.pull_request.number }}"
           SHA="${{ github.event.pull_request.head.sha }}"
 
           echo "=== Required status checks on main ==="
           gh api repos/${{ github.repository }}/branches/main/protection/required_status_checks \
-            --jq '.checks[] | "\(.context) (app_id: \(.app_id))"'
+            --jq '.checks[] | "\(.context) (app_id: \(.app_id))"' || echo "(403 — needs admin token)"
 
           echo "=== Check runs on head commit $SHA ==="
           gh api repos/${{ github.repository }}/commits/$SHA/check-runs \
