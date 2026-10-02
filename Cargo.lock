@@ -870,8 +870,8 @@ checksum = "d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4"
 
 [[package]]
 name = "ruff_python_ast"
-version = "0.0.15"
-source = "git+https://github.com/astral-sh/ruff?tag=0.16.9#0be08a206f9c3180afd3e93bcc792ed5cb1f4db1"
+version = "0.0.16"
+source = "git+https://github.com/astral-sh/ruff?tag=0.16.10#3265ed1f944c98bb4c04d632fbefb1257cdb583d"
 dependencies = [
  "aho-corasick",
  "arrayvec",
@@ -891,8 +891,8 @@ dependencies = [
 
 [[package]]
 name = "ruff_python_parser"
-version = "0.0.15"
-source = "git+https://github.com/astral-sh/ruff?tag=0.16.9#0be08a206f9c3180afd3e93bcc792ed5cb1f4db1"
+version = "0.0.16"
+source = "git+https://github.com/astral-sh/ruff?tag=0.16.10#3265ed1f944c98bb4c04d632fbefb1257cdb583d"
 dependencies = [
  "bitflags",
  "bstr",
@@ -914,8 +914,8 @@ dependencies = [
 
 [[package]]
 name = "ruff_python_trivia"
-version = "0.0.15"
-source = "git+https://github.com/astral-sh/ruff?tag=0.16.9#0be08a206f9c3180afd3e93bcc792ed5cb1f4db1"
+version = "0.0.16"
+source = "git+https://github.com/astral-sh/ruff?tag=0.16.10#3265ed1f944c98bb4c04d632fbefb1257cdb583d"
 dependencies = [
  "itertools",
  "memchr",
@@ -928,8 +928,8 @@ dependencies = [
 
 [[package]]
 name = "ruff_source_file"
-version = "0.0.15"
-source = "git+https://github.com/astral-sh/ruff?tag=0.16.9#0be08a206f9c3180afd3e93bcc792ed5cb1f4db1"
+version = "0.0.16"
+source = "git+https://github.com/astral-sh/ruff?tag=0.16.10#3265ed1f944c98bb4c04d632fbefb1257cdb583d"
 dependencies = [
  "memchr",
  "ruff_text_size",
@@ -937,15 +937,15 @@ dependencies = [
 
 [[package]]
 name = "ruff_text_size"
-version = "0.0.15"
-source = "git+https://github.com/astral-sh/ruff?tag=0.16.9#0be08a206f9c3180afd3e93bcc792ed5cb1f4db1"
+version = "0.0.16"
+source = "git+https://github.com/astral-sh/ruff?tag=0.16.10#3265ed1f944c98bb4c04d632fbefb1257cdb583d"
 dependencies = [
  "get-size2",
 ]
 
 [[package]]
 name = "ruffian"
-version = "0.24.0"
+version = "0.25.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -1377,18 +1377,18 @@ dependencies = [
 
 [[package]]
 name = "zerocopy"
-version = "0.8.58"
+version = "0.8.59"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c17e8fafad82b542ff3717217ecdc736231b59e387768c9630123b4ce4d2db44"
+checksum = "6df92bf3d9227be3d53173901ddbffac2babc27ae50f397776ffd6dc33f800cb"
 dependencies = [
  "zerocopy-derive",
 ]
 
 [[package]]
 name = "zerocopy-derive"
-version = "0.8.58"
+version = "0.8.59"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "595f56e044df4f46a0c9a626f65c3d99eb8488f7e8a8baa12dd76326d9710bf2"
+checksum = "ac4f328cf2f05d084e496c3e9c3f33ed0a183656a16e1fcec4d464d8373aec82"
 dependencies = [
  "proc-macro2",
  "quote",
