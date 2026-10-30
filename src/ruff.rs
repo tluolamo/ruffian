@@ -33,9 +33,17 @@ pub fn check(files: &[String], extra_args: &[&str]) -> Result<Vec<Violation>> {
         .output()
         .context("failed to spawn ruff — is it installed and on PATH?")?;
 
-    if output.stdout.is_empty() {
-        return Ok(vec![]);
+    if !matches!(output.status.code(), Some(0 | 1)) {
+        anyhow::bail!(
+            "ruff check failed ({}): {}",
+            output.status,
+            String::from_utf8_lossy(&output.stderr).trim()
+        );
     }
+    if !output.stderr.is_empty() {
+        eprint!("{}", String::from_utf8_lossy(&output.stderr));
+    }
+
     let violations: Vec<Violation> =
         serde_json::from_slice(&output.stdout).context("failed to parse ruff JSON output")?;
     Ok(violations)

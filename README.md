@@ -5,7 +5,7 @@
 [![Downloads](https://static.pepy.tech/badge/ruffian)](https://pepy.tech/projects/ruffian)
 [![CI](https://github.com/tluolamo/ruffian/actions/workflows/ci.yml/badge.svg)](https://github.com/tluolamo/ruffian/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![ruff 0.17.2](https://img.shields.io/badge/ruff-0.17.2-30173D)
+![ruff >=0.11.0](https://img.shields.io/badge/ruff-%3E%3D0.11.0-30173D)
 
 > *A ruffian breaks rules. This tool adds the ones ruff refused.*
 
@@ -24,6 +24,15 @@ uv add --dev ruffian
 ```
 
 ruff is a declared dependency and will be installed automatically.
+ruffian requires Ruff 0.11.0 or newer. Upgrading Ruff does not normally require
+a new ruffian release, though an incompatible Ruff change may require one. For
+reproducible results, pin Ruff as well as ruffian, for example
+`pip install ruffian==0.27.0 ruff==0.11.0`.
+
+ruffian also embeds a separately pinned Ruff parser for built-in rules. Parser
+updates are released when needed; newer Python syntax may require an update to
+that parser even when the installed Ruff executable supports it. Compatibility
+with the minimum and latest Ruff releases is checked in CI and weekly.
 
 ---
 
@@ -313,7 +322,7 @@ task fmt:check          # check formatting without writing changes (what CI runs
 task install:local      # build and install into the active Python env for manual testing
 task version:bump       # bump minor version and push (optionally: task version:bump -- 1.0.0)
 task release            # interactive release: checks CI, generates notes, creates GitHub release
-task ruff:update        # update ruff dependency pins to latest release
+task ruff:update        # update embedded Ruff parser pins to latest release
 ```
 
 ### Coding style

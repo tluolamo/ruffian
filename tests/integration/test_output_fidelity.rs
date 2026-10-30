@@ -17,6 +17,11 @@ fn ruff_output(args: &[&str]) -> (Vec<u8>, Vec<u8>) {
         .args(args)
         .output()
         .expect("ruff must be on PATH");
+    assert!(
+        matches!(out.status.code(), Some(0 | 1)),
+        "ruff check failed: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
     (out.stdout, out.stderr)
 }
 
