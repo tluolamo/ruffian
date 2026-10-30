@@ -85,7 +85,7 @@ tasks:
     cmd: python3 scripts/create_release.py
 
   ruff:update:
-    desc: Update ruff git dependency pins to the latest release
+    desc: Update embedded Ruff parser pins to the latest release
     cmds:
       - python3 scripts/update_ruff.py
       - "{{.CARGO}} build"

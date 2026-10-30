@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Update ruff git dependency pins in Cargo.toml and minimum version in pyproject.toml."""
+"""Update the embedded ruff parser dependencies in Cargo.toml."""
 import json
 import re
 import sys
@@ -25,8 +25,6 @@ def current_ruff_tag(cargo: str) -> str:
 
 def main() -> None:
     cargo_path = ROOT / "Cargo.toml"
-    pyproject_path = ROOT / "pyproject.toml"
-
     cargo = cargo_path.read_text()
     current = current_ruff_tag(cargo)
     latest = latest_ruff_tag()
@@ -37,22 +35,12 @@ def main() -> None:
 
     print(f"Updating ruff: {current} → {latest}")
 
-    version = latest.lstrip("v")
-    current_version = current.lstrip("v")
-
-    cargo_path.write_text(cargo.replace(f'tag = "{current}"', f'tag = "{latest}"'))
-
-    pyproject = pyproject_path.read_text()
-    pyproject_path.write_text(re.sub(r"ruff>=[\d.]+", f"ruff>={version}", pyproject))
-
-    readme_path = ROOT / "README.md"
-    readme = readme_path.read_text()
-    readme_path.write_text(re.sub(
-        r"!\[ruff [\d.]+\]\(https://img\.shields\.io/badge/ruff-[\d.]+-30173D\)",
-        f"![ruff {version}](https://img.shields.io/badge/ruff-{version}-30173D)",
-        readme,
+    cargo_path.write_text(re.sub(
+        r'(git = "https://github\.com/astral-sh/ruff",\s*tag = ")'
+        + re.escape(current) + r'("[\s}])',
+        lambda m: f"{m.group(1)}{latest}{m.group(2)}",
+        cargo,
     ))
-
     print("Done. Run `cargo build` to verify the new version compiles.")
 
 
